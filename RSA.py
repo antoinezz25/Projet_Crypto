@@ -158,27 +158,8 @@ if __name__ == "__main__":
     print(f"   Clé privée (d, n)    : {cle_priv}")
     print()
     
-    # 2. Chiffrer un message
-    message = "Bonjour RSA!"
-    print(f"2. Message original : '{message}'")
-    print()
     
-    print("3. Chiffrement...")
-    message_chiffre = chiffrerTexte(message, cle_pub)
-    print(f"   Message chiffré : {message_chiffre}")
-    print()
-    
-    # 3. Déchiffrer le message
-    print("4. Déchiffrement...")
-    message_dechiffre = dechiffrerTexte(message_chiffre, cle_priv)
-    print(f"   Message déchiffré : '{message_dechiffre}'")
-    print()
-    
-    # Vérification
-    if message == message_dechiffre:
-        print("✓ Succès ! Le message a été correctement chiffré et déchiffré.")
-    else:
-        print("✗ Erreur dans le processus de chiffrement/déchiffrement.")
+  
     
     print()
     print("=" * 60)
