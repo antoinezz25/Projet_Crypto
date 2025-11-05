@@ -1,5 +1,14 @@
 import random
 
+mehdi_publique = (6603, 49087)
+mehdi_privee = (41363, 49087)
+
+antoine_publique = (6983, 18281)
+antoine_privee = (10103, 18281)
+
+baptiste_publique = (30509, 36863)
+baptiste_privee = (23309, 36863)
+
 def pgcd(a, b):
     """Calcule le Plus Grand Commun Diviseur de a et b"""
     while b != 0:
@@ -135,6 +144,46 @@ def dechiffrerTexte(texte_chiffre, cle_privee):
             return None
         texte_clair += chr(code)  # Convertir code ASCII en caractère
     return texte_clair
+
+def chiffrerMessage(message, cle_publique):
+    """
+    Chiffre un message complet avec RSA en utilisant une clé publique
+    
+    Args:
+        message (str): Le message à chiffrer
+        cle_publique (tuple): La clé publique au format (e, n)
+    
+    Returns:
+        list: Liste des nombres chiffrés, ou None en cas d'erreur
+    """
+    if not message:
+        print("Erreur: message vide")
+        return None
+    
+    if not cle_publique or len(cle_publique) != 2:
+        print("Erreur: clé publique invalide")
+        return None
+    
+    e, n = cle_publique
+    message_chiffre = []
+    
+    for i, char in enumerate(message):
+        code_ascii = ord(char)
+        
+        # Vérifier que le caractère peut être chiffré avec cette clé
+        if code_ascii >= n:
+            print(f"Erreur: caractère '{char}' (code {code_ascii}) trop grand pour la clé (n={n})")
+            return None
+        
+        # Chiffrer le caractère
+        chiffre = codageRSA(code_ascii, cle_publique)
+        if chiffre is None:
+            print(f"Erreur lors du chiffrement du caractère '{char}'")
+            return None
+        
+        message_chiffre.append(chiffre)
+    
+    return message_chiffre
 
 
 # ===== PROGRAMME PRINCIPAL =====
