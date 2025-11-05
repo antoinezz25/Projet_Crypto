@@ -1,13 +1,13 @@
 import random
 
 mehdi_publique = (6603, 49087)
-mehdi_privee = (41363, 49087)
+mehdi_privee = (42467, 49087)
 
 antoine_publique = (6983, 18281)
-antoine_privee = (10103, 18281)
+antoine_privee = (647, 18281)
 
 baptiste_publique = (30509, 36863)
-baptiste_privee = (23309, 36863)
+baptiste_privee = (21029, 36863)
 
 def pgcd(a, b):
     """Calcule le Plus Grand Commun Diviseur de a et b"""
