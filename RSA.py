@@ -173,9 +173,9 @@ if __name__ == "__main__":
         print("Choix invalide!")
         exit()
     
-    print(f"\n✅ Connecté en tant que: {mon_nom}")
-    print(f"🔓 Ta clé publique: {ma_cle_pub}")
-    print(f"🔐 Ta clé privée: {ma_cle_priv}")
+    print(f"\nConnecté en tant que: {mon_nom}")
+    print(f"Ta clé publique: {ma_cle_pub}")
+    print(f"Ta clé privée: {ma_cle_priv}")
     print()
     
     # Mode interactif
@@ -188,9 +188,10 @@ if __name__ == "__main__":
         print("1. Chiffrer un message (pour envoyer)")
         print("2. Déchiffrer un message (reçu)")
         print("3. Afficher les clés publiques")
-        print("4. Quitter")
+        print("4. Changer d'utilisateur")
+        print("5. Quitter")
         
-        choix = input("\nVotre choix (1-4): ").strip()
+        choix = input("\nVotre choix (1-5): ").strip()
         
         if choix == "1":
             # CHIFFRER pour quelqu'un
@@ -220,18 +221,18 @@ if __name__ == "__main__":
                     
                     msg = input(f"\nTon message pour {nom_dest}: ")
                     
-                    print(f"\n🔒 Chiffrement avec la clé publique de {nom_dest}...")
+                    print(f"\nChiffrement avec la clé publique de {nom_dest}...")
                     chiffre = chiffrerTexte(msg, cle_pub_dest)
                     
                     if chiffre:
-                        print(f"\n✅ MESSAGE CHIFFRÉ (copie et envoie sur Discord):")
+                        print(f"\nMESSAGE CHIFFRÉ (copie et envoie sur Discord):")
                         print("─" * 60)
                         print(chiffre)
                         print("─" * 60)
                 else:
-                    print("❌ Choix invalide!")
+                    print("Choix invalide!")
             except:
-                print("❌ Erreur!")
+                print("Erreur!")
         
         elif choix == "2":
             # DÉCHIFFRER avec MA clé privée
@@ -244,16 +245,16 @@ if __name__ == "__main__":
                 nombres = input("> ").strip()
                 chiffre = eval(nombres)  # Convertir la liste
                 
-                print(f"\n🔓 Déchiffrement avec ta clé privée...")
+                print(f"\nDéchiffrement avec ta clé privée...")
                 dechiffre = dechiffrerTexte(chiffre, ma_cle_priv)
                 
                 if dechiffre:
-                    print(f"\n✅ MESSAGE DÉCHIFFRÉ:")
+                    print(f"\nMESSAGE DÉCHIFFRÉ:")
                     print("─" * 60)
                     print(f"'{dechiffre}'")
                     print("─" * 60)
             except Exception as e:
-                print(f"❌ Erreur: {e}")
+                print(f"Erreur: {e}")
         
         elif choix == "3":
             # AFFICHER LES CLÉS
@@ -265,8 +266,44 @@ if __name__ == "__main__":
             print(f"Mehdi    : {mehdi_publique}")
         
         elif choix == "4":
-            print(f"\n👋 Au revoir {mon_nom}!")
+            # CHANGER D'UTILISATEUR
+            print("\n" + "-" * 60)
+            print("CHANGER D'UTILISATEUR")
+            print("-" * 60)
+            print("Qui veux-tu être maintenant?")
+            print("1. Antoine")
+            print("2. Baptiste")
+            print("3. Mehdi")
+            
+            choix_nouveau = input("\nTon choix (1-3): ").strip()
+            
+            if choix_nouveau == "1":
+                mon_nom = "Antoine"
+                ma_cle_pub = antoine_publique
+                ma_cle_priv = antoine_privee
+                print(f"\nTu es maintenant connecté en tant que: {mon_nom}")
+                print(f"Ta clé publique: {ma_cle_pub}")
+                print(f"Ta clé privée: {ma_cle_priv}")
+            elif choix_nouveau == "2":
+                mon_nom = "Baptiste"
+                ma_cle_pub = baptiste_publique
+                ma_cle_priv = baptiste_privee
+                print(f"\nTu es maintenant connecté en tant que: {mon_nom}")
+                print(f"Ta clé publique: {ma_cle_pub}")
+                print(f"Ta clé privée: {ma_cle_priv}")
+            elif choix_nouveau == "3":
+                mon_nom = "Mehdi"
+                ma_cle_pub = mehdi_publique
+                ma_cle_priv = mehdi_privee
+                print(f"\nTu es maintenant connecté en tant que: {mon_nom}")
+                print(f"Ta clé publique: {ma_cle_pub}")
+                print(f"Ta clé privée: {ma_cle_priv}")
+            else:
+                print("Choix invalide!")
+        
+        elif choix == "5":
+            print(f"\nAu revoir {mon_nom}!")
             break
         
         else:
-            print("\n❌ Choix invalide!")
+            print("\nChoix invalide!")
