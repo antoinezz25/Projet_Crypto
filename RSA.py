@@ -1,5 +1,21 @@
 import random
 
+def pgcd(a, b):
+    """Calcule le Plus Grand Commun Diviseur de a et b"""
+    while b != 0:
+        a, b = b, a % b
+    return a
+
+def euclide(a, b):
+    """Algorithme d'Euclide étendu"""
+    if b == 0:
+        return (a, 1, 0)
+    else:
+        q = a // b
+        r = a % b
+        pgcd_val, u, v = euclide(b, r)
+        return (pgcd_val, v, u - q * v)
+
 def inverseModulaire(e, m):
     # Vérifier que e et m sont premiers entre eux
     if pgcd(e, m) !=1 :
@@ -92,8 +108,124 @@ def decodageRSA(c , cle):
     return expoModulaire(c, cle[0], cle[1])
 
 
-print(estPremier(15))
-print(estPremier(17))
+# ===== FONCTIONS POUR CHIFFRER/DÉCHIFFRER DU TEXTE =====
 
-premierAleatoire(10, 50)
-print(premierAleatoire(10, 50))
+def chiffrerTexte(texte, cle_publique):
+    """Chiffre un texte complet avec RSA"""
+    # Convertir chaque caractère en nombre et le chiffrer
+    texte_chiffre = []
+    for char in texte:
+        code = ord(char)  # Convertir caractère en code ASCII
+        chiffre = codageRSA(code, cle_publique)
+        if chiffre is None:
+            print(f"Erreur: caractère '{char}' trop grand pour la clé")
+            return None
+        texte_chiffre.append(chiffre)
+    return texte_chiffre
+
+
+def dechiffrerTexte(texte_chiffre, cle_privee):
+    """Déchiffre un texte chiffré avec RSA"""
+    # Déchiffrer chaque nombre et le reconvertir en caractère
+    texte_clair = ""
+    for chiffre in texte_chiffre:
+        code = decodageRSA(chiffre, cle_privee)
+        if code is None:
+            print(f"Erreur de déchiffrement")
+            return None
+        texte_clair += chr(code)  # Convertir code ASCII en caractère
+    return texte_clair
+
+
+# ===== PROGRAMME PRINCIPAL =====
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print(" " * 15 + "CHIFFREMENT RSA")
+    print("=" * 60)
+    print()
+    
+    # 1. Générer les clés
+    print("1. Génération des clés RSA...")
+    e, p, q = choixCle(100, 100)
+    cle_pub = clePublique(p, q, e)
+    cle_priv = clePrivee(p, q, e)
+    
+    print(f"   p = {p}")
+    print(f"   q = {q}")
+    print(f"   e = {e}")
+    print(f"   Clé publique (e, n)  : {cle_pub}")
+    print(f"   Clé privée (d, n)    : {cle_priv}")
+    print()
+    
+    # 2. Chiffrer un message
+    message = "Bonjour RSA!"
+    print(f"2. Message original : '{message}'")
+    print()
+    
+    print("3. Chiffrement...")
+    message_chiffre = chiffrerTexte(message, cle_pub)
+    print(f"   Message chiffré : {message_chiffre}")
+    print()
+    
+    # 3. Déchiffrer le message
+    print("4. Déchiffrement...")
+    message_dechiffre = dechiffrerTexte(message_chiffre, cle_priv)
+    print(f"   Message déchiffré : '{message_dechiffre}'")
+    print()
+    
+    # Vérification
+    if message == message_dechiffre:
+        print("✓ Succès ! Le message a été correctement chiffré et déchiffré.")
+    else:
+        print("✗ Erreur dans le processus de chiffrement/déchiffrement.")
+    
+    print()
+    print("=" * 60)
+    print()
+    
+    # Mode interactif
+    print("Mode interactif:")
+    print("-" * 60)
+    
+    while True:
+        print("\nQue voulez-vous faire?")
+        print("1. Chiffrer un nouveau message")
+        print("2. Déchiffrer un message")
+        print("3. Générer de nouvelles clés")
+        print("4. Quitter")
+        
+        choix = input("\nVotre choix (1-4): ").strip()
+        
+        if choix == "1":
+            msg = input("\nEntrez votre message à chiffrer: ")
+            chiffre = chiffrerTexte(msg, cle_pub)
+            if chiffre:
+                print(f"\nMessage chiffré: {chiffre}")
+                print(f"Taille: {len(chiffre)} nombres")
+        
+        elif choix == "2":
+            print("\nEntrez les nombres chiffrés séparés par des espaces:")
+            try:
+                nombres = input("> ").strip()
+                chiffre = [int(x) for x in nombres.split()]
+                dechiffre = dechiffrerTexte(chiffre, cle_priv)
+                if dechiffre:
+                    print(f"\nMessage déchiffré: '{dechiffre}'")
+            except:
+                print("Erreur: format invalide")
+        
+        elif choix == "3":
+            print("\nGénération de nouvelles clés...")
+            e, p, q = choixCle(100, 100)
+            cle_pub = clePublique(p, q, e)
+            cle_priv = clePrivee(p, q, e)
+            print(f"Clé publique : {cle_pub}")
+            print(f"Clé privée   : {cle_priv}")
+        
+        elif choix == "4":
+            print("\nAu revoir!")
+            break
+        
+        else:
+            print("\nChoix invalide!")
