@@ -36,7 +36,6 @@ def inverseModulaire(e, m):
     # (u % m garantit que le résultat est dans l'intervalle [0, m-1])
     return u % m
 
-
 def estPremier(n):
     if n <= 1 :
         return False
@@ -78,7 +77,6 @@ def expoModulaire(a, n, m):
         temp = expoModulaire(a, n - 1, m)
         return (a * temp) % m
     
-
 def expoModulaire2(x,e,n):
     if e == 0 :
         return 1
@@ -87,7 +85,6 @@ def expoModulaire2(x,e,n):
         return (f*f) % n
     else :
         return (x*f*f) % n
-    
 
 def choixCle(inf, lg):
     p = premierAleatoire(inf, inf+lg)
@@ -132,7 +129,6 @@ def chiffrerTexte(texte, cle_publique):
         texte_chiffre.append(chiffre)
     return texte_chiffre
 
-
 def dechiffrerTexte(texte_chiffre, cle_privee):
     """Déchiffre un texte chiffré avec RSA"""
     # Déchiffrer chaque nombre et le reconvertir en caractère
@@ -144,47 +140,6 @@ def dechiffrerTexte(texte_chiffre, cle_privee):
             return None
         texte_clair += chr(code)  # Convertir code ASCII en caractère
     return texte_clair
-
-def chiffrerMessage(message, cle_publique):
-    """
-    Chiffre un message complet avec RSA en utilisant une clé publique
-    
-    Args:
-        message (str): Le message à chiffrer
-        cle_publique (tuple): La clé publique au format (e, n)
-    
-    Returns:
-        list: Liste des nombres chiffrés, ou None en cas d'erreur
-    """
-    if not message:
-        print("Erreur: message vide")
-        return None
-    
-    if not cle_publique or len(cle_publique) != 2:
-        print("Erreur: clé publique invalide")
-        return None
-    
-    e, n = cle_publique
-    message_chiffre = []
-    
-    for i, char in enumerate(message):
-        code_ascii = ord(char)
-        
-        # Vérifier que le caractère peut être chiffré avec cette clé
-        if code_ascii >= n:
-            print(f"Erreur: caractère '{char}' (code {code_ascii}) trop grand pour la clé (n={n})")
-            return None
-        
-        # Chiffrer le caractère
-        chiffre = codageRSA(code_ascii, cle_publique)
-        if chiffre is None:
-            print(f"Erreur lors du chiffrement du caractère '{char}'")
-            return None
-        
-        message_chiffre.append(chiffre)
-    
-    return message_chiffre
-
 
 # ===== PROGRAMME PRINCIPAL =====
 
