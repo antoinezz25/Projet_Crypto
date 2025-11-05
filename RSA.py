@@ -145,72 +145,128 @@ def dechiffrerTexte(texte_chiffre, cle_privee):
 
 if __name__ == "__main__":
     print("=" * 60)
-    print(" " * 15 + "CHIFFREMENT RSA")
+    print(" " * 15 + "MESSAGERIE CHIFFRÉE RSA")
     print("=" * 60)
     print()
     
-    # 1. Générer les clés
-    print("1. Génération des clés RSA...")
-    e, p, q = choixCle(100, 100)
-    cle_pub = clePublique(p, q, e)
-    cle_priv = clePrivee(p, q, e)
+    # Choisir qui on est
+    print("Qui es-tu?")
+    print("1. Antoine")
+    print("2. Baptiste")
+    print("3. Mehdi")
     
-    print(f"   p = {p}")
-    print(f"   q = {q}")
-    print(f"   e = {e}")
-    print(f"   Clé publique (e, n)  : {cle_pub}")
-    print(f"   Clé privée (d, n)    : {cle_priv}")
-    print()
+    choix_user = input("\nTon choix (1-3): ").strip()
     
+    if choix_user == "1":
+        mon_nom = "Antoine"
+        ma_cle_pub = antoine_publique
+        ma_cle_priv = antoine_privee
+    elif choix_user == "2":
+        mon_nom = "Baptiste"
+        ma_cle_pub = baptiste_publique
+        ma_cle_priv = baptiste_privee
+    elif choix_user == "3":
+        mon_nom = "Mehdi"
+        ma_cle_pub = mehdi_publique
+        ma_cle_priv = mehdi_privee
+    else:
+        print("Choix invalide!")
+        exit()
     
-  
-    
-    print()
-    print("=" * 60)
+    print(f"\n✅ Connecté en tant que: {mon_nom}")
+    print(f"🔓 Ta clé publique: {ma_cle_pub}")
+    print(f"🔐 Ta clé privée: {ma_cle_priv}")
     print()
     
     # Mode interactif
+    print("=" * 60)
     print("Mode interactif:")
     print("-" * 60)
     
     while True:
-        print("\nQue voulez-vous faire?")
-        print("1. Chiffrer un nouveau message")
-        print("2. Déchiffrer un message")
-        print("3. Générer de nouvelles clés")
+        print(f"\n[{mon_nom}] Que veux-tu faire?")
+        print("1. Chiffrer un message (pour envoyer)")
+        print("2. Déchiffrer un message (reçu)")
+        print("3. Afficher les clés publiques")
         print("4. Quitter")
         
         choix = input("\nVotre choix (1-4): ").strip()
         
         if choix == "1":
-            msg = input("\nEntrez votre message à chiffrer: ")
-            chiffre = chiffrerTexte(msg, cle_pub)
-            if chiffre:
-                print(f"\nMessage chiffré: {chiffre}")
-                print(f"Taille: {len(chiffre)} nombres")
+            # CHIFFRER pour quelqu'un
+            print("\n" + "-" * 60)
+            print("CHIFFRER UN MESSAGE")
+            print("-" * 60)
+            print("\nÀ qui veux-tu envoyer?")
+            
+            # Afficher les destinataires possibles (sauf soi-même)
+            destinataires = []
+            if mon_nom != "Antoine":
+                print("1. Antoine")
+                destinataires.append(("Antoine", antoine_publique))
+            if mon_nom != "Baptiste":
+                print(f"{len(destinataires) + 1}. Baptiste")
+                destinataires.append(("Baptiste", baptiste_publique))
+            if mon_nom != "Mehdi":
+                print(f"{len(destinataires) + 1}. Mehdi")
+                destinataires.append(("Mehdi", mehdi_publique))
+            
+            choix_dest = input("\nChoix: ").strip()
+            
+            try:
+                idx = int(choix_dest) - 1
+                if 0 <= idx < len(destinataires):
+                    nom_dest, cle_pub_dest = destinataires[idx]
+                    
+                    msg = input(f"\nTon message pour {nom_dest}: ")
+                    
+                    print(f"\n🔒 Chiffrement avec la clé publique de {nom_dest}...")
+                    chiffre = chiffrerTexte(msg, cle_pub_dest)
+                    
+                    if chiffre:
+                        print(f"\n✅ MESSAGE CHIFFRÉ (copie et envoie sur Discord):")
+                        print("─" * 60)
+                        print(chiffre)
+                        print("─" * 60)
+                else:
+                    print("❌ Choix invalide!")
+            except:
+                print("❌ Erreur!")
         
         elif choix == "2":
-            print("\nEntrez les nombres chiffrés séparés par des espaces:")
+            # DÉCHIFFRER avec MA clé privée
+            print("\n" + "-" * 60)
+            print("DÉCHIFFRER UN MESSAGE")
+            print("-" * 60)
+            print("\nColle le message chiffré (la liste de nombres):")
+            
             try:
                 nombres = input("> ").strip()
-                chiffre = [int(x) for x in nombres.split()]
-                dechiffre = dechiffrerTexte(chiffre, cle_priv)
+                chiffre = eval(nombres)  # Convertir la liste
+                
+                print(f"\n🔓 Déchiffrement avec ta clé privée...")
+                dechiffre = dechiffrerTexte(chiffre, ma_cle_priv)
+                
                 if dechiffre:
-                    print(f"\nMessage déchiffré: '{dechiffre}'")
-            except:
-                print("Erreur: format invalide")
+                    print(f"\n✅ MESSAGE DÉCHIFFRÉ:")
+                    print("─" * 60)
+                    print(f"'{dechiffre}'")
+                    print("─" * 60)
+            except Exception as e:
+                print(f"❌ Erreur: {e}")
         
         elif choix == "3":
-            print("\nGénération de nouvelles clés...")
-            e, p, q = choixCle(100, 100)
-            cle_pub = clePublique(p, q, e)
-            cle_priv = clePrivee(p, q, e)
-            print(f"Clé publique : {cle_pub}")
-            print(f"Clé privée   : {cle_priv}")
+            # AFFICHER LES CLÉS
+            print("\n" + "-" * 60)
+            print("CLÉS PUBLIQUES")
+            print("-" * 60)
+            print(f"Antoine  : {antoine_publique}")
+            print(f"Baptiste : {baptiste_publique}")
+            print(f"Mehdi    : {mehdi_publique}")
         
         elif choix == "4":
-            print("\nAu revoir!")
+            print(f"\n👋 Au revoir {mon_nom}!")
             break
         
         else:
-            print("\nChoix invalide!")
+            print("\n❌ Choix invalide!")
