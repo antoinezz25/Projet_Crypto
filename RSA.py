@@ -141,6 +141,73 @@ def dechiffrerTexte(texte_chiffre, cle_privee):
         texte_clair += chr(code)  # Convertir code ASCII en caractère
     return texte_clair
 
+
+# ===== FONCTIONS POUR CHIFFRER/DÉCHIFFRER DES FICHIERS =====
+
+def chiffrerFichier(fichier_entree, fichier_sortie, cle_publique):
+    """Chiffre un fichier texte"""
+    try:
+        # Lire le fichier
+        with open(fichier_entree, 'r', encoding='utf-8') as f:
+            contenu = f.read()
+        
+        print(f"Fichier lu: {len(contenu)} caractères")
+        
+        # Chiffrer le contenu
+        print("Chiffrement en cours...")
+        contenu_chiffre = chiffrerTexte(contenu, cle_publique)
+        
+        if contenu_chiffre is None:
+            return False
+        
+        # Sauvegarder dans le fichier de sortie
+        with open(fichier_sortie, 'w', encoding='utf-8') as f:
+            f.write(str(contenu_chiffre))
+        
+        print(f"✅ Fichier chiffré sauvegardé dans: {fichier_sortie}")
+        return True
+        
+    except FileNotFoundError:
+        print(f"❌ Fichier '{fichier_entree}' non trouvé!")
+        return False
+    except Exception as e:
+        print(f"❌ Erreur: {e}")
+        return False
+
+
+def dechiffrerFichier(fichier_entree, fichier_sortie, cle_privee):
+    """Déchiffre un fichier"""
+    try:
+        # Lire le fichier chiffré
+        with open(fichier_entree, 'r', encoding='utf-8') as f:
+            contenu = f.read()
+        
+        # Convertir en liste de nombres
+        contenu_chiffre = eval(contenu)
+        
+        print(f"Fichier lu: {len(contenu_chiffre)} nombres chiffrés")
+        
+        # Déchiffrer
+        print("Déchiffrement en cours...")
+        contenu_clair = dechiffrerTexte(contenu_chiffre, cle_privee)
+        
+        if contenu_clair is None:
+            return False
+        
+        # Sauvegarder
+        with open(fichier_sortie, 'w', encoding='utf-8') as f:
+            f.write(contenu_clair)
+        
+        print(f"✅ Fichier déchiffré sauvegardé dans: {fichier_sortie}")
+        return True
+        
+    except FileNotFoundError:
+        print(f"❌ Fichier '{fichier_entree}' non trouvé!")
+        return False
+    except Exception as e:
+        print(f"❌ Erreur: {e}")
+        return False
+
 # ===== PROGRAMME PRINCIPAL =====
 
 if __name__ == "__main__":
@@ -185,8 +252,8 @@ if __name__ == "__main__":
     
     while True:
         print(f"\n[{mon_nom}] Que veux-tu faire?")
-        print("1. Chiffrer un message (pour envoyer)")
-        print("2. Déchiffrer un message (reçu)")
+        print("1. Chiffrer un fichier texte")
+        print("2. Déchiffrer un fichier texte")
         print("3. Afficher les clés publiques")
         print("4. Changer d'utilisateur")
         print("5. Quitter")
@@ -194,13 +261,14 @@ if __name__ == "__main__":
         choix = input("\nVotre choix (1-5): ").strip()
         
         if choix == "1":
-            # CHIFFRER pour quelqu'un
+            # CHIFFRER UN FICHIER
             print("\n" + "-" * 60)
-            print("CHIFFRER UN MESSAGE")
+            print("CHIFFRER UN FICHIER")
             print("-" * 60)
-            print("\nÀ qui veux-tu envoyer?")
             
-            # Afficher les destinataires possibles (sauf soi-même)
+            print("\nÀ qui veux-tu envoyer ce fichier?")
+            
+            # Afficher les destinataires possibles
             destinataires = []
             if mon_nom != "Antoine":
                 print("1. Antoine")
@@ -219,42 +287,27 @@ if __name__ == "__main__":
                 if 0 <= idx < len(destinataires):
                     nom_dest, cle_pub_dest = destinataires[idx]
                     
-                    msg = input(f"\nTon message pour {nom_dest}: ")
+                    fichier_entree = input("\nNom du fichier à chiffrer: ").strip()
+                    fichier_sortie = input("Nom du fichier de sortie (ex: message_chiffre.txt): ").strip()
                     
-                    print(f"\nChiffrement avec la clé publique de {nom_dest}...")
-                    chiffre = chiffrerTexte(msg, cle_pub_dest)
-                    
-                    if chiffre:
-                        print(f"\nMESSAGE CHIFFRÉ (copie et envoie sur Discord):")
-                        print("─" * 60)
-                        print(chiffre)
-                        print("─" * 60)
+                    print(f"\nChiffrement du fichier pour {nom_dest}...")
+                    chiffrerFichier(fichier_entree, fichier_sortie, cle_pub_dest)
                 else:
                     print("Choix invalide!")
             except:
                 print("Erreur!")
         
         elif choix == "2":
-            # DÉCHIFFRER avec MA clé privée
+            # DÉCHIFFRER UN FICHIER
             print("\n" + "-" * 60)
-            print("DÉCHIFFRER UN MESSAGE")
+            print("DÉCHIFFRER UN FICHIER")
             print("-" * 60)
-            print("\nColle le message chiffré (la liste de nombres):")
             
-            try:
-                nombres = input("> ").strip()
-                chiffre = eval(nombres)  # Convertir la liste
-                
-                print(f"\nDéchiffrement avec ta clé privée...")
-                dechiffre = dechiffrerTexte(chiffre, ma_cle_priv)
-                
-                if dechiffre:
-                    print(f"\nMESSAGE DÉCHIFFRÉ:")
-                    print("─" * 60)
-                    print(f"'{dechiffre}'")
-                    print("─" * 60)
-            except Exception as e:
-                print(f"Erreur: {e}")
+            fichier_entree = input("\nNom du fichier chiffré: ").strip()
+            fichier_sortie = input("Nom du fichier de sortie (ex: message_clair.txt): ").strip()
+            
+            print(f"\nDéchiffrement avec ta clé privée...")
+            dechiffrerFichier(fichier_entree, fichier_sortie, ma_cle_priv)
         
         elif choix == "3":
             # AFFICHER LES CLÉS
