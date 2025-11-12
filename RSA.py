@@ -165,14 +165,14 @@ def chiffrerFichier(fichier_entree, fichier_sortie, cle_publique):
         with open(fichier_sortie, 'w', encoding='utf-8') as f:
             f.write(str(contenu_chiffre))
         
-        print(f"✅ Fichier chiffré sauvegardé dans: {fichier_sortie}")
+        print(f"Fichier chiffré sauvegardé dans: {fichier_sortie}")
         return True
         
     except FileNotFoundError:
-        print(f"❌ Fichier '{fichier_entree}' non trouvé!")
+        print(f"Fichier '{fichier_entree}' non trouvé!")
         return False
     except Exception as e:
-        print(f"❌ Erreur: {e}")
+        print(f"Erreur: {e}")
         return False
 
 
@@ -199,14 +199,14 @@ def dechiffrerFichier(fichier_entree, fichier_sortie, cle_privee):
         with open(fichier_sortie, 'w', encoding='utf-8') as f:
             f.write(contenu_clair)
         
-        print(f"✅ Fichier déchiffré sauvegardé dans: {fichier_sortie}")
+        print(f"Fichier déchiffré sauvegardé dans: {fichier_sortie}")
         return True
         
     except FileNotFoundError:
-        print(f"❌ Fichier '{fichier_entree}' non trouvé!")
+        print(f"Fichier '{fichier_entree}' non trouvé!")
         return False
     except Exception as e:
-        print(f"❌ Erreur: {e}")
+        print(f"Erreur: {e}")
         return False
 
 # ===== PROGRAMME PRINCIPAL =====
