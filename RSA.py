@@ -209,6 +209,77 @@ def dechiffrerFichier(fichier_entree, fichier_sortie, cle_privee):
         print(f"Erreur: {e}")
         return False
 
+
+def chiffrerImage(fichier_entree, fichier_sortie, cle_publique):
+    """Chiffre une image (fichier binaire)"""
+    try:
+        # Lire le fichier binaire
+        with open(fichier_entree, 'rb') as f:
+            contenu = f.read()
+        
+        print(f"Fichier lu: {len(contenu)} octets")
+        
+        # Chiffrer chaque octet
+        print("Chiffrement en cours...")
+        contenu_chiffre = []
+        for octet in contenu:
+            chiffre = codageRSA(octet, cle_publique)
+            if chiffre is None:
+                print(f"Erreur: octet '{octet}' trop grand pour la clé")
+                return False
+            contenu_chiffre.append(chiffre)
+        
+        # Sauvegarder dans le fichier de sortie
+        with open(fichier_sortie, 'w', encoding='utf-8') as f:
+            f.write(str(contenu_chiffre))
+        
+        print(f"Fichier chiffré sauvegardé dans: {fichier_sortie}")
+        return True
+        
+    except FileNotFoundError:
+        print(f"Fichier '{fichier_entree}' non trouvé!")
+        return False
+    except Exception as e:
+        print(f"Erreur: {e}")
+        return False
+    
+
+def dechiffrerImage(fichier_entree, fichier_sortie, cle_privee):
+    """Déchiffre une image (fichier binaire)"""
+    try:
+        # Lire le fichier chiffré
+        with open(fichier_entree, 'r', encoding='utf-8') as f:
+            contenu = f.read()
+        
+        # Convertir en liste de nombres
+        contenu_chiffre = eval(contenu)
+        
+        print(f"Fichier lu: {len(contenu_chiffre)} nombres chiffrés")
+        
+        # Déchiffrer chaque nombre
+        print("Déchiffrement en cours...")
+        contenu_clair = bytearray()
+        for chiffre in contenu_chiffre:
+            octet = decodageRSA(chiffre, cle_privee)
+            if octet is None:
+                print(f"Erreur de déchiffrement")
+                return False
+            contenu_clair.append(octet)
+        
+        # Sauvegarder dans le fichier binaire
+        with open(fichier_sortie, 'wb') as f:
+            f.write(contenu_clair)
+        
+        print(f"Fichier déchiffré sauvegardé dans: {fichier_sortie}")
+        return True
+        
+    except FileNotFoundError:
+        print(f"Fichier '{fichier_entree}' non trouvé!")
+        return False
+    except Exception as e:
+        print(f"Erreur: {e}")
+        return False
+    
 # ===== PROGRAMME PRINCIPAL =====
 
 if __name__ == "__main__":
@@ -225,19 +296,19 @@ if __name__ == "__main__":
     e1, p1, q1 = choixCle(100, 100)
     antoine_publique = clePublique(p1, q1, e1)
     antoine_privee = clePrivee(p1, q1, e1)
-    print(f"✓ Antoine  - Clé publique: {antoine_publique}")
+    print(f"Antoine  - Clé publique: {antoine_publique}")
     
     # Baptiste
     e2, p2, q2 = choixCle(100, 100)
     baptiste_publique = clePublique(p2, q2, e2)
     baptiste_privee = clePrivee(p2, q2, e2)
-    print(f"✓ Baptiste - Clé publique: {baptiste_publique}")
+    print(f"Baptiste - Clé publique: {baptiste_publique}")
     
     # Mehdi
     e3, p3, q3 = choixCle(100, 100)
     mehdi_publique = clePublique(p3, q3, e3)
     mehdi_privee = clePrivee(p3, q3, e3)
-    print(f"✓ Mehdi    - Clé publique: {mehdi_publique}")
+    print(f"Mehdi    - Clé publique: {mehdi_publique}")
     
     print()
     print("=" * 60)
@@ -281,11 +352,13 @@ if __name__ == "__main__":
         print(f"\n[{mon_nom}] Que veux-tu faire?")
         print("1. Chiffrer un fichier texte")
         print("2. Déchiffrer un fichier texte")
-        print("3. Afficher les clés publiques")
-        print("4. Changer d'utilisateur")
-        print("5. Quitter")
+        print("3. Chiffrer une image")
+        print("4. Déchiffrer une image")
+        print("5. Afficher les clés publiques")
+        print("6. Changer d'utilisateur")
+        print("7. Quitter")
         
-        choix = input("\nVotre choix (1-5): ").strip()
+        choix = input("\nVotre choix (1-7): ").strip()
         
         if choix == "1":
             # CHIFFRER UN FICHIER
@@ -337,6 +410,55 @@ if __name__ == "__main__":
             dechiffrerFichier(fichier_entree, fichier_sortie, ma_cle_priv)
         
         elif choix == "3":
+            # CHIFFRER UNE IMAGE
+            print("\n" + "-" * 60)
+            print("CHIFFRER UNE IMAGE")
+            print("-" * 60)
+            
+            print("\nÀ qui veux-tu envoyer cette image?")
+            
+            # Afficher les destinataires possibles
+            destinataires = []
+            if mon_nom != "Antoine":
+                print("1. Antoine")
+                destinataires.append(("Antoine", antoine_publique))
+            if mon_nom != "Baptiste":
+                print(f"{len(destinataires) + 1}. Baptiste")
+                destinataires.append(("Baptiste", baptiste_publique))
+            if mon_nom != "Mehdi":
+                print(f"{len(destinataires) + 1}. Mehdi")
+                destinataires.append(("Mehdi", mehdi_publique))
+            
+            choix_dest = input("\nChoix: ").strip()
+            
+            try:
+                idx = int(choix_dest) - 1
+                if 0 <= idx < len(destinataires):
+                    nom_dest, cle_pub_dest = destinataires[idx]
+                    
+                    fichier_entree = input("\nNom du fichier image à chiffrer: ").strip()
+                    fichier_sortie = input("Nom du fichier de sortie (ex: image_chiffree.txt): ").strip()
+                    
+                    print(f"\nChiffrement de l'image pour {nom_dest}...")
+                    chiffrerImage(fichier_entree, fichier_sortie, cle_pub_dest)
+                else:
+                    print("Choix invalide!")
+            except:
+                print("Erreur!")
+
+        elif choix == "4":
+            # DÉCHIFFRER UNE IMAGE
+            print("\n" + "-" * 60)
+            print("DÉCHIFFRER UNE IMAGE")
+            print("-" * 60)
+            
+            fichier_entree = input("\nNom du fichier image chiffrée: ").strip()
+            fichier_sortie = input("Nom du fichier de sortie (ex: image_claire.png): ").strip()
+            
+            print(f"\nDéchiffrement avec ta clé privée...")
+            dechiffrerImage(fichier_entree, fichier_sortie, ma_cle_priv)
+            
+        elif choix == "5":
             # AFFICHER LES CLÉS
             print("\n" + "-" * 60)
             print("CLÉS PUBLIQUES")
@@ -345,7 +467,7 @@ if __name__ == "__main__":
             print(f"Baptiste : {baptiste_publique}")
             print(f"Mehdi    : {mehdi_publique}")
         
-        elif choix == "4":
+        elif choix == "6":
             # CHANGER D'UTILISATEUR
             print("\n" + "-" * 60)
             print("CHANGER D'UTILISATEUR")
@@ -381,7 +503,7 @@ if __name__ == "__main__":
             else:
                 print("Choix invalide!")
         
-        elif choix == "5":
+        elif choix == "7":
             print(f"\nAu revoir {mon_nom}!")
             break
         
