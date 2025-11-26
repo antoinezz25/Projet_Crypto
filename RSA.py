@@ -1,4 +1,10 @@
 import random
+try:
+    import tkinter as tk
+    from tkinter import messagebox, filedialog, ttk
+    TKINTER_AVAILABLE = True
+except ImportError:
+    TKINTER_AVAILABLE = False
 
 # Les clés seront générées aléatoirement au démarrage du programme
 mehdi_publique = None
@@ -279,6 +285,177 @@ def dechiffrerImage(fichier_entree, fichier_sortie, cle_privee):
     except Exception as e:
         print(f"Erreur: {e}")
         return False
+
+# ===== INTERFACE GRAPHIQUE SIMPLE =====
+
+def interface_graphique():
+    """Interface graphique simple avec tkinter"""
+    if not TKINTER_AVAILABLE:
+        print("Erreur: tkinter n'est pas disponible. Utilisation du mode console.")
+        return False
+    
+    root = tk.Tk()
+    root.title("RSA - Messagerie Chiffrée")
+    root.geometry("600x500")
+    root.configure(bg='lightblue')
+    
+    # Variables globales pour l'interface
+    current_user = tk.StringVar(value="")
+    users_data = {}
+    
+    # Générer les clés
+    e1, p1, q1 = choixCle(100, 100)
+    users_data["Antoine"] = {
+        "public": clePublique(p1, q1, e1),
+        "private": clePrivee(p1, q1, e1)
+    }
+    
+    e2, p2, q2 = choixCle(100, 100)
+    users_data["Baptiste"] = {
+        "public": clePublique(p2, q2, e2),
+        "private": clePrivee(p2, q2, e2)
+    }
+    
+    e3, p3, q3 = choixCle(100, 100)
+    users_data["Mehdi"] = {
+        "public": clePublique(p3, q3, e3),
+        "private": clePrivee(p3, q3, e3)
+    }
+    
+    # Titre
+    tk.Label(root, text="MESSAGERIE RSA", font=("Arial", 16, "bold"), 
+             bg='lightblue', fg='darkblue').pack(pady=10)
+    
+    # Sélection utilisateur
+    user_frame = tk.Frame(root, bg='lightblue')
+    user_frame.pack(pady=10)
+    
+    tk.Label(user_frame, text="Choisir votre identité:", font=("Arial", 12), 
+             bg='lightblue').pack()
+    
+    for user in ["Antoine", "Baptiste", "Mehdi"]:
+        tk.Radiobutton(user_frame, text=user, variable=current_user, value=user,
+                      font=("Arial", 10), bg='lightblue').pack(side='left', padx=20)
+    
+    # Zone d'information
+    info_label = tk.Label(root, text="Sélectionnez votre identité pour commencer", 
+                         font=("Arial", 10), bg='lightblue', fg='red')
+    info_label.pack(pady=10)
+    
+    def update_info():
+        user = current_user.get()
+        if user:
+            info = f"Connecté: {user}\nClé publique: {users_data[user]['public']}"
+            info_label.config(text=info, fg='darkgreen')
+    
+    current_user.trace('w', lambda *args: update_info())
+    
+    # Fonctions pour les boutons
+    def chiffrer_fichier():
+        user = current_user.get()
+        if not user:
+            messagebox.showwarning("Attention", "Sélectionnez d'abord votre identité!")
+            return
+        
+        # Choisir destinataire
+        dest_window = tk.Toplevel(root)
+        dest_window.title("Destinataire")
+        dest_window.geometry("300x200")
+        dest_window.configure(bg='lightblue')
+        
+        tk.Label(dest_window, text="Choisir le destinataire:", 
+                font=("Arial", 12), bg='lightblue').pack(pady=20)
+        
+        dest_var = tk.StringVar()
+        for u in ["Antoine", "Baptiste", "Mehdi"]:
+            if u != user:
+                tk.Radiobutton(dest_window, text=u, variable=dest_var, value=u,
+                              font=("Arial", 10), bg='lightblue').pack()
+        
+        def confirmer_dest():
+            dest = dest_var.get()
+            if not dest:
+                messagebox.showwarning("Attention", "Choisissez un destinataire!")
+                return
+            
+            dest_window.destroy()
+            
+            # Sélectionner fichiers
+            fichier_entree = filedialog.askopenfilename(
+                title="Fichier à chiffrer",
+                filetypes=[("Fichiers texte", "*.txt"), ("Tous", "*.*")]
+            )
+            
+            if fichier_entree:
+                fichier_sortie = filedialog.asksaveasfilename(
+                    title="Sauvegarder le fichier chiffré",
+                    defaultextension=".txt",
+                    filetypes=[("Fichiers texte", "*.txt")]
+                )
+                
+                if fichier_sortie:
+                    if chiffrerFichier(fichier_entree, fichier_sortie, users_data[dest]['public']):
+                        messagebox.showinfo("Succès", "Fichier chiffré avec succès!")
+                    else:
+                        messagebox.showerror("Erreur", "Erreur lors du chiffrement")
+        
+        tk.Button(dest_window, text="Confirmer", command=confirmer_dest,
+                 font=("Arial", 10), bg='green', fg='white').pack(pady=20)
+    
+    def dechiffrer_fichier():
+        user = current_user.get()
+        if not user:
+            messagebox.showwarning("Attention", "Sélectionnez d'abord votre identité!")
+            return
+        
+        fichier_entree = filedialog.askopenfilename(
+            title="Fichier chiffré",
+            filetypes=[("Fichiers texte", "*.txt"), ("Tous", "*.*")]
+        )
+        
+        if fichier_entree:
+            fichier_sortie = filedialog.asksaveasfilename(
+                title="Sauvegarder le fichier déchiffré",
+                defaultextension=".txt",
+                filetypes=[("Fichiers texte", "*.txt")]
+            )
+            
+            if fichier_sortie:
+                if dechiffrerFichier(fichier_entree, fichier_sortie, users_data[user]['private']):
+                    messagebox.showinfo("Succès", "Fichier déchiffré avec succès!")
+                else:
+                    messagebox.showerror("Erreur", "Erreur lors du déchiffrement")
+    
+    def voir_cles():
+        info = "CLÉS PUBLIQUES:\n\n"
+        for user, data in users_data.items():
+            info += f"{user}: {data['public']}\n"
+        messagebox.showinfo("Clés Publiques", info)
+    
+    def mode_console():
+        root.destroy()
+    
+    # Boutons principaux
+    buttons_frame = tk.Frame(root, bg='lightblue')
+    buttons_frame.pack(pady=20)
+    
+    tk.Button(buttons_frame, text="Chiffrer Fichier", command=chiffrer_fichier,
+             font=("Arial", 12), bg='red', fg='white', width=20).pack(pady=5)
+    
+    tk.Button(buttons_frame, text="Déchiffrer Fichier", command=dechiffrer_fichier,
+             font=("Arial", 12), bg='orange', fg='white', width=20).pack(pady=5)
+    
+    tk.Button(buttons_frame, text="Voir Clés", command=voir_cles,
+             font=("Arial", 12), bg='blue', fg='white', width=20).pack(pady=5)
+    
+    tk.Button(buttons_frame, text="Mode Console", command=mode_console,
+             font=("Arial", 12), bg='gray', fg='white', width=20).pack(pady=5)
+    
+    tk.Button(buttons_frame, text="Quitter", command=root.quit,
+             font=("Arial", 12), bg='darkred', fg='white', width=20).pack(pady=5)
+    
+    root.mainloop()
+    return True
     
 # ===== PROGRAMME PRINCIPAL =====
 
@@ -288,7 +465,21 @@ if __name__ == "__main__":
     print("=" * 60)
     print()
     
-    # Générer les clés pour les 3 utilisateurs
+    # Choix du mode
+    print("Choisir le mode d'utilisation:")
+    print("1. Interface Graphique")
+    print("2. Mode Console")
+    print()
+    
+    choix_mode = input("Votre choix (1-2): ").strip()
+    
+    if choix_mode == "1":
+        if interface_graphique():
+            exit()  # Si l'interface graphique s'est bien fermée
+        else:
+            print("Basculement vers le mode console...")
+    
+    # Mode console (par défaut ou si l'interface graphique a échoué)
     print(" Génération des clés aléatoires...")
     print()
     
@@ -356,9 +547,10 @@ if __name__ == "__main__":
         print("4. Déchiffrer une image")
         print("5. Afficher les clés publiques")
         print("6. Changer d'utilisateur")
-        print("7. Quitter")
+        print("7. Interface Graphique")
+        print("8. Quitter")
         
-        choix = input("\nVotre choix (1-7): ").strip()
+        choix = input("\nVotre choix (1-8): ").strip()
         
         if choix == "1":
             # CHIFFRER UN FICHIER
@@ -504,6 +696,14 @@ if __name__ == "__main__":
                 print("Choix invalide!")
         
         elif choix == "7":
+            # INTERFACE GRAPHIQUE
+            print("\nLancement de l'interface graphique...")
+            if interface_graphique():
+                break
+            else:
+                print("Retour au mode console...")
+        
+        elif choix == "8":
             print(f"\nAu revoir {mon_nom}!")
             break
         
